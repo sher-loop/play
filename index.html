@@ -6,185 +6,172 @@
   <title>Music Player</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #0d0d0d;
-      color: #e0e0e0;
-      margin: 0;
-      padding: 0;
+      background-color: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
-    header {
-      padding: 20px;
-      text-align: center;
-      font-size: 1.5rem;
-      color: #00ffe5;
-      text-shadow: 0 0 10px #00ffe5;
-    }
-    #searchBar {
-      margin: 10px 0 20px 0;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 8px;
-      outline: none;
-      width: 90%;
-      max-width: 500px;
-      font-size: 1rem;
-      background: #1a1a1a;
-      color: #00ffe5;
-      box-shadow: 0 0 8px rgba(0, 255, 229, 0.4);
-    }
-    #player {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: #111;
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      box-shadow: 0 -2px 15px rgba(0, 255, 229, 0.3);
-    }
-    audio {
-      width: 100%;
-      max-width: 700px;
-    }
-    #controls {
-      margin-top: 10px;
-      display: flex;
-      gap: 20px;
       justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
-    .btn {
-      padding: 10px 18px;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      background: #1a1a1a;
-      color: #00ffe5;
-      font-size: 1.2rem;
-      transition: all 0.2s ease-in-out;
-      box-shadow: 0 0 10px rgba(0, 255, 229, 0.4);
+
+    .player-container {
+      width: 400px;
+      height: 600px;
+      background: #1e1e1e;
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
-    .btn:hover {
-      background: #00ffe5;
-      color: #000;
-      box-shadow: 0 0 15px rgba(0, 255, 229, 0.8);
+
+    .search-bar {
+      padding: 15px;
+      background: #2a2a2a;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
-    #playlist {
-      flex: 1;
+
+    .search-bar input {
       width: 100%;
-      max-width: 800px;
-      padding: 20px;
-      overflow-y: auto;
-      margin-bottom: 160px; /* extra space for controls */
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      background: #333;
+      color: white;
     }
-    .song {
+
+    .song-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .song-item {
       padding: 10px;
       margin-bottom: 8px;
-      background: #1a1a1a;
       border-radius: 8px;
       cursor: pointer;
-      transition: all 0.2s ease-in-out;
+      transition: background 0.2s;
     }
-    .song:hover {
-      background: #262626;
-      box-shadow: 0 0 10px rgba(0, 255, 229, 0.4);
+
+    .song-item:hover {
+      background: #333;
     }
-    .active {
-      background: #00ffe5;
-      color: #000;
-      font-weight: bold;
+
+    .controls {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 15px;
+      background: #2a2a2a;
+    }
+
+    .controls button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .controls button:hover {
+      transform: scale(1.2);
+      color: #1db954; /* Spotify green */
     }
   </style>
 </head>
 <body>
-  <header>⚡ Tech Black Music Player</header>
-  <input type="text" id="searchBar" placeholder="🔍 Search for a song...">
-  <div id="playlist">Loading songs...</div>
-  
-  <div id="player">
-    <div id="current-song">Select a song</div>
-    <audio id="audio" controls autoplay></audio>
-    <div id="controls">
-      <button class="btn" id="prevBtn">⏮</button>
-      <button class="btn" id="nextBtn">⏭</button>
+  <div class="player-container">
+    <!-- 🔍 Search bar stays fixed -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search songs...">
+    </div>
+
+    <!-- 🎵 Songs scroll inside here -->
+    <div class="song-list" id="songList"></div>
+
+    <!-- ⏯️ Player controls -->
+    <div class="controls">
+      <button id="prevBtn">⏮</button>
+      <button id="playPauseBtn">▶️</button>
+      <button id="nextBtn">⏭</button>
     </div>
   </div>
 
-  <script>
-    const playlistEl = document.getElementById("playlist");
-    const audioEl = document.getElementById("audio");
-    const currentSongEl = document.getElementById("current-song");
-    const searchBar = document.getElementById("searchBar");
-    const nextBtn = document.getElementById("nextBtn");
-    const prevBtn = document.getElementById("prevBtn");
+  <audio id="audioPlayer"></audio>
 
-    let songs = [];
-    let filteredSongs = [];
+  <script>
+    let playlist = [];
     let currentIndex = 0;
+    let isPlaying = false;
+
+    const audioPlayer = document.getElementById("audioPlayer");
+    const songListEl = document.getElementById("songList");
+    const playPauseBtn = document.getElementById("playPauseBtn");
+    const searchInput = document.getElementById("searchInput");
 
     async function loadPlaylist() {
-      try {
-        const res = await fetch("https://raw.githubusercontent.com/sher-loop/song/main/List/playlist.json");
-        songs = await res.json();
-        filteredSongs = songs;
-        renderPlaylist();
-      } catch (e) {
-        playlistEl.innerHTML = "⚠️ Failed to load playlist.";
-      }
+      const res = await fetch("https://raw.githubusercontent.com/sher-loop/song/main/List/playlist.json");
+      playlist = await res.json();
+      renderSongs(playlist);
     }
 
-    function renderPlaylist() {
-      playlistEl.innerHTML = "";
-      filteredSongs.forEach((song, i) => {
+    function renderSongs(songs) {
+      songListEl.innerHTML = "";
+      songs.forEach((song, index) => {
         const div = document.createElement("div");
-        div.className = "song";
-        div.textContent = `${i + 1}. ${song.title}`;
-        div.addEventListener("click", () => playSong(i));
-        playlistEl.appendChild(div);
+        div.className = "song-item";
+        div.textContent = (index + 1) + ". " + song.title;
+        div.onclick = () => playSong(index);
+        songListEl.appendChild(div);
       });
     }
 
     function playSong(index) {
       currentIndex = index;
-      audioEl.src = filteredSongs[index].url;
-      currentSongEl.textContent = `${index + 1}. ${filteredSongs[index].title}`;
-      highlightActive();
-      audioEl.play();
+      audioPlayer.src = playlist[currentIndex].url;
+      audioPlayer.play();
+      isPlaying = true;
+      playPauseBtn.textContent = "⏸";
     }
 
-    function highlightActive() {
-      document.querySelectorAll(".song").forEach((el, i) => {
-        el.classList.toggle("active", i === currentIndex);
-      });
-    }
+    playPauseBtn.onclick = () => {
+      if (isPlaying) {
+        audioPlayer.pause();
+        isPlaying = false;
+        playPauseBtn.textContent = "▶️";
+      } else {
+        audioPlayer.play();
+        isPlaying = true;
+        playPauseBtn.textContent = "⏸";
+      }
+    };
 
-    // autoplay next
-    audioEl.addEventListener("ended", () => {
-      nextSong();
-    });
-
-    function nextSong() {
-      currentIndex = (currentIndex + 1) % filteredSongs.length;
+    document.getElementById("nextBtn").onclick = () => {
+      currentIndex = (currentIndex + 1) % playlist.length;
       playSong(currentIndex);
-    }
+    };
 
-    function prevSong() {
-      currentIndex = (currentIndex - 1 + filteredSongs.length) % filteredSongs.length;
+    document.getElementById("prevBtn").onclick = () => {
+      currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
       playSong(currentIndex);
-    }
+    };
 
-    nextBtn.addEventListener("click", nextSong);
-    prevBtn.addEventListener("click", prevSong);
+    audioPlayer.onended = () => {
+      currentIndex = (currentIndex + 1) % playlist.length;
+      playSong(currentIndex);
+    };
 
-    // search filter
-    searchBar.addEventListener("input", (e) => {
-      const query = e.target.value.toLowerCase();
-      filteredSongs = songs.filter(song => song.title.toLowerCase().includes(query));
-      renderPlaylist();
+    searchInput.addEventListener("input", () => {
+      const filtered = playlist.filter(song =>
+        song.title.toLowerCase().includes(searchInput.value.toLowerCase())
+      );
+      renderSongs(filtered);
     });
 
     loadPlaylist();
