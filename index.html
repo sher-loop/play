@@ -261,9 +261,30 @@
   <audio id="audio" preload="metadata"></audio>
 
 <script>
-/* ----------------------
-   Clean, bug-fixed player
-   ---------------------- */
+/* Media Session API so headphone buttons work */
+function updateMediaSessionMetadata(song){
+  if (!("mediaSession" in navigator) || !song) return;
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: song.title,
+      artist: song.artist || "Unknown",
+      album: "Sherlock Playlist",
+      artwork: [
+        { src: "https://sherloop.rf.gd/pic/sher.jpg", sizes: "512x512", type: "image/png" }
+      ]
+    });
+  } catch (err) { /* ignore if not supported */ }
+}
+if ("mediaSession" in navigator) {
+  navigator.mediaSession.setActionHandler('play', () => { playSong(); });
+  navigator.mediaSession.setActionHandler('pause', () => { pauseSong(); });
+  navigator.mediaSession.setActionHandler('previoustrack', () => { prevSong(); });
+  navigator.mediaSession.setActionHandler('nexttrack', () => { nextSong(); });
+}
+
+/* initialize */
+loadSongs();
+
 
 const audio = document.getElementById('audio');
 const songListEl = document.getElementById('songList');
