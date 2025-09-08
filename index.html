@@ -51,13 +51,35 @@
       width: 100%;
       max-width: 700px;
     }
+    #controls {
+      margin-top: 10px;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      background: #1a1a1a;
+      color: #00ffe5;
+      font-size: 1.2rem;
+      transition: all 0.2s ease-in-out;
+      box-shadow: 0 0 10px rgba(0, 255, 229, 0.4);
+    }
+    .btn:hover {
+      background: #00ffe5;
+      color: #000;
+      box-shadow: 0 0 15px rgba(0, 255, 229, 0.8);
+    }
     #playlist {
       flex: 1;
       width: 100%;
       max-width: 800px;
       padding: 20px;
       overflow-y: auto;
-      margin-bottom: 120px;
+      margin-bottom: 160px; /* extra space for controls */
     }
     .song {
       padding: 10px;
@@ -86,6 +108,10 @@
   <div id="player">
     <div id="current-song">Select a song</div>
     <audio id="audio" controls autoplay></audio>
+    <div id="controls">
+      <button class="btn" id="prevBtn">⏮</button>
+      <button class="btn" id="nextBtn">⏭</button>
+    </div>
   </div>
 
   <script>
@@ -93,6 +119,8 @@
     const audioEl = document.getElementById("audio");
     const currentSongEl = document.getElementById("current-song");
     const searchBar = document.getElementById("searchBar");
+    const nextBtn = document.getElementById("nextBtn");
+    const prevBtn = document.getElementById("prevBtn");
 
     let songs = [];
     let filteredSongs = [];
@@ -100,7 +128,6 @@
 
     async function loadPlaylist() {
       try {
-        // ✅ Change URL to your hosted playlist.json
         const res = await fetch("https://raw.githubusercontent.com/sher-loop/song/main/List/playlist.json");
         songs = await res.json();
         filteredSongs = songs;
@@ -135,13 +162,25 @@
       });
     }
 
-    // ✅ Autoplay next song
+    // autoplay next
     audioEl.addEventListener("ended", () => {
-      currentIndex = (currentIndex + 1) % filteredSongs.length;
-      playSong(currentIndex);
+      nextSong();
     });
 
-    // ✅ Search filter
+    function nextSong() {
+      currentIndex = (currentIndex + 1) % filteredSongs.length;
+      playSong(currentIndex);
+    }
+
+    function prevSong() {
+      currentIndex = (currentIndex - 1 + filteredSongs.length) % filteredSongs.length;
+      playSong(currentIndex);
+    }
+
+    nextBtn.addEventListener("click", nextSong);
+    prevBtn.addEventListener("click", prevSong);
+
+    // search filter
     searchBar.addEventListener("input", (e) => {
       const query = e.target.value.toLowerCase();
       filteredSongs = songs.filter(song => song.title.toLowerCase().includes(query));
