@@ -303,6 +303,46 @@
     });
 
     loadSongs();
+    // ✅ Media Session API (for headphone & system controls)
+if ("mediaSession" in navigator) {
+  function updateMetadata(song) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: song.title,
+      artist: song.artist || "Unknown",
+      album: "Sherlock Playlist",
+      artwork: [
+        { src: "https://i.imgur.com/3pVZC3R.png", sizes: "512x512", type: "image/png" } // replace with your logo/cover
+      ]
+    });
+  }
+
+  navigator.mediaSession.setActionHandler("play", () => playSong());
+  navigator.mediaSession.setActionHandler("pause", () => pauseSong());
+  navigator.mediaSession.setActionHandler("previoustrack", () => {
+    currentIndex = (currentIndex - 1 + filteredSongs.length) % filteredSongs.length;
+    playSong();
+  });
+  navigator.mediaSession.setActionHandler("nexttrack", () => {
+    currentIndex = (currentIndex + 1) % filteredSongs.length;
+    playSong();
+  });
+}
+
+// ✅ Update metadata whenever a new song plays
+function playSong() {
+  const song = filteredSongs[currentIndex];
+  if (!song) return;
+  audio.src = song.url;
+  audio.play();
+  playBtn.textContent = "⏸";
+  updateActiveSong();
+  nowPlayingEl.textContent = "▶️ Now Playing: " + song.title;
+
+  if ("mediaSession" in navigator) {
+    updateMetadata(song);
+  }
+}
+
   </script>
 </body>
 </html>
