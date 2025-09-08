@@ -1,303 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sherlock Playlist</title>
   <style>
     body {
-      background-color: #0d0d0d;
-      color: #fff;
-      font-family: "Poppins", sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    .player-container {
-      width: 600px;
-      height: 720px;
-      background: #111;
-      border-radius: 20px;
-      box-shadow: 0 0 30px #0ff;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* 🌟 Header */
-    .header {
-      text-align: center;
-      font-size: 26px;
-      font-weight: bold;
-      padding: 15px;
-      color: #0ff;
-      text-shadow: 0 0 12px #0ff, 0 0 20px #00f;
-      background: #0d0d0d;
-      border-bottom: 2px solid #0ff;
-    }
-
-    /* 🔍 Search bar */
-    .search-bar {
-      padding: 15px;
-      background: #1a1a1a;
-      position: sticky;
-      top: 56px;
-      z-index: 10;
-    }
-
-    .search-bar input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      outline: none;
       background: #000;
       color: #0ff;
-      box-shadow: 0 0 8px #0ff;
-    }
-
-    /* 🎵 Song list */
-    .song-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-    }
-
-    .song-item {
-      padding: 10px;
-      margin-bottom: 8px;
-      border-radius: 8px;
-      cursor: pointer;
-      background: #1a1a1a;
-      transition: all 0.2s ease-in-out;
-    }
-
-    .song-item:hover {
-      background: #0d0d0d;
-      box-shadow: 0 0 8px #0ff;
-      transform: scale(1.02);
-    }
-
-    /* 🎚 Progress bar */
-    .progress-container {
-      width: 100%;
-      height: 6px;
-      background: #333;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .progress {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #00f, #0ff);
-      box-shadow: 0 0 10px #0ff;
-      transition: width 0.1s;
-    }
-
-    .time-info {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
       display: flex;
-      justify-content: space-between;
-      padding: 5px 15px;
-      font-size: 12px;
-      color: #aaa;
-    }
-
-    /* ⏯️ Controls */
-    .controls {
-      display: flex;
-      justify-content: space-around;
+      flex-direction: column;
       align-items: center;
-      padding: 15px;
-      background: #1a1a1a;
     }
 
-    .controls button {
-      background: none;
-      border: none;
-      color: #0ff;
-      font-size: 28px;
-      cursor: pointer;
-      transition: all 0.2s ease-in-out;
+    h1 {
+      margin: 20px;
+      font-size: 2rem;
+      text-shadow: 0 0 20px #0ff;
     }
 
-    .controls button:hover {
-      transform: scale(1.2);
-      text-shadow: 0 0 12px #0ff;
-    }
-
-    /* 🎶 Waveform animation */
     .waveform {
       display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      height: 60px;
-      background: #0d0d0d;
-      padding: 10px;
       gap: 4px;
+      margin-bottom: 15px;
     }
-
     .bar {
       width: 6px;
       height: 20px;
       background: #0ff;
-      border-radius: 3px;
+      animation: wave 1s infinite ease-in-out;
+      border-radius: 4px;
       box-shadow: 0 0 10px #0ff, 0 0 20px #00f;
-      animation: bounce 1s infinite ease-in-out;
+    }
+    .bar:nth-child(1) { animation-delay: 0s; }
+    .bar:nth-child(2) { animation-delay: 0.2s; }
+    .bar:nth-child(3) { animation-delay: 0.4s; }
+    .bar:nth-child(4) { animation-delay: 0.6s; }
+    .bar:nth-child(5) { animation-delay: 0.8s; }
+
+    @keyframes wave {
+      0%, 100% { transform: scaleY(0.3); }
+      50% { transform: scaleY(1.5); }
     }
 
-    .bar:nth-child(2) { animation-delay: 0.1s; }
-    .bar:nth-child(3) { animation-delay: 0.2s; }
-    .bar:nth-child(4) { animation-delay: 0.3s; }
-    .bar:nth-child(5) { animation-delay: 0.4s; }
-    .bar:nth-child(6) { animation-delay: 0.5s; }
-    .bar:nth-child(7) { animation-delay: 0.6s; }
-    .bar:nth-child(8) { animation-delay: 0.7s; }
+    .search-bar {
+      width: 90%;
+      max-width: 500px;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      font-size: 1rem;
+      text-align: center;
+      background: #111;
+      color: #0ff;
+      box-shadow: 0 0 10px #0ff, 0 0 15px #00f;
+    }
 
-    @keyframes bounce {
-      0%, 100% { height: 15px; }
-      50% { height: 60px; }
+    .song-list {
+      width: 90%;
+      max-width: 500px;
+      height: 400px;
+      overflow-y: auto;
+      padding: 10px;
+      border-radius: 10px;
+      background: #111;
+      box-shadow: inset 0 0 20px #00f;
+    }
+
+    .song {
+      padding: 10px;
+      margin-bottom: 5px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: 0.2s;
+    }
+    .song:hover {
+      background: #222;
+      box-shadow: 0 0 10px #0ff;
+    }
+    .song.active {
+      background: #0ff;
+      color: #000;
+      font-weight: bold;
+      box-shadow: 0 0 15px #0ff, 0 0 25px #00f;
+    }
+
+    .player-controls {
+      display: flex;
+      gap: 20px;
+      margin-top: 15px;
+    }
+    .btn {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 50%;
+      background: #111;
+      color: #0ff;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 0 10px #0ff;
+    }
+    .btn:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 20px #0ff, 0 0 30px #00f;
+    }
+
+    audio {
+      width: 90%;
+      max-width: 500px;
+      margin-top: 20px;
+      accent-color: #0ff;
+      filter: drop-shadow(0 0 10px #0ff);
     }
   </style>
 </head>
 <body>
-  <div class="player-container">
-    <!-- 🌟 Neon Header -->
-    <div class="header">🎧 Sherlock Playlist</div>
-
-
-    <!-- 🔍 Search bar -->
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Search songs...">
-    </div>
-
-    <!-- 🎵 Songs scroll -->
-    <div class="song-list" id="songList"></div>
-
-    <!-- 🎚 Song progress -->
-    <div class="progress-container" id="progressContainer">
-      <div class="progress" id="progress"></div>
-    </div>
-    <div class="time-info">
-      <span id="currentTime">0:00</span>
-      <span id="duration">0:00</span>
-    </div>
-
-    <!-- ⏯️ Controls -->
-    <div class="controls">
-      <button id="prevBtn">⏮</button>
-      <button id="playPauseBtn">▶️</button>
-      <button id="nextBtn">⏭</button>
-    </div>
+  <h1>🎵 Sherlock Playlist</h1>
+  <div class="waveform">
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
   </div>
 
-  <audio id="audioPlayer"></audio>
+  <input type="text" id="search" class="search-bar" placeholder="Search songs..." />
+
+  <div class="song-list" id="songList"></div>
+
+  <div class="player-controls">
+    <button class="btn" id="prev">⏮</button>
+    <button class="btn" id="play">▶️</button>
+    <button class="btn" id="next">⏭</button>
+  </div>
+
+  <audio id="audio" controls></audio>
 
   <script>
-    let playlist = [];
+    let songs = [];
+    let filteredSongs = [];
     let currentIndex = 0;
-    let isPlaying = false;
-
-    const audioPlayer = document.getElementById("audioPlayer");
+    const audio = document.getElementById("audio");
     const songListEl = document.getElementById("songList");
-    const playPauseBtn = document.getElementById("playPauseBtn");
-    const searchInput = document.getElementById("searchInput");
-    const progressContainer = document.getElementById("progressContainer");
-    const progress = document.getElementById("progress");
-    const currentTimeEl = document.getElementById("currentTime");
-    const durationEl = document.getElementById("duration");
-    const waveform = document.getElementById("waveform");
+    const playBtn = document.getElementById("play");
 
-    async function loadPlaylist() {
+    async function loadSongs() {
       const res = await fetch("https://raw.githubusercontent.com/sher-loop/song/main/List/playlist.json");
-      playlist = await res.json();
-      renderSongs(playlist);
+      songs = await res.json();
+      filteredSongs = songs;
+      renderSongs();
     }
 
-    function renderSongs(songs) {
+    function renderSongs() {
       songListEl.innerHTML = "";
-      songs.forEach((song, index) => {
+      filteredSongs.forEach((song, i) => {
         const div = document.createElement("div");
-        div.className = "song-item";
-        div.textContent = (index + 1) + ". " + song.title;
-        div.onclick = () => playSong(index);
+        div.className = "song" + (i === currentIndex ? " active" : "");
+        div.textContent = (i + 1) + ". " + song.title;
+        div.onclick = () => {
+          currentIndex = i;
+          playSong();
+        };
         songListEl.appendChild(div);
       });
     }
 
-    function playSong(index) {
-      currentIndex = index;
-      audioPlayer.src = playlist[currentIndex].url;
-      audioPlayer.play();
-      isPlaying = true;
-      playPauseBtn.textContent = "⏸";
-      waveform.style.opacity = "1"; // show bars
+    function playSong() {
+      const song = filteredSongs[currentIndex];
+      if (!song) return;
+      audio.src = song.url;
+      audio.play();
+      playBtn.textContent = "⏸";
+      updateActiveSong();
     }
 
-    playPauseBtn.onclick = () => {
-      if (isPlaying) {
-        audioPlayer.pause();
-        isPlaying = false;
-        playPauseBtn.textContent = "▶️";
-        waveform.style.opacity = "0.3"; // dim bars
-      } else {
-        audioPlayer.play();
-        isPlaying = true;
-        playPauseBtn.textContent = "⏸";
-        waveform.style.opacity = "1"; 
-      }
-    };
-
-    document.getElementById("nextBtn").onclick = () => {
-      currentIndex = (currentIndex + 1) % playlist.length;
-      playSong(currentIndex);
-    };
-
-    document.getElementById("prevBtn").onclick = () => {
-      currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-      playSong(currentIndex);
-    };
-
-    audioPlayer.onended = () => {
-      currentIndex = (currentIndex + 1) % playlist.length;
-      playSong(currentIndex);
-    };
-
-    searchInput.addEventListener("input", () => {
-      const filtered = playlist.filter(song =>
-        song.title.toLowerCase().includes(searchInput.value.toLowerCase())
-      );
-      renderSongs(filtered);
-    });
-
-    // 🎚 Progress bar update
-    audioPlayer.ontimeupdate = () => {
-      if (audioPlayer.duration) {
-        const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-        progress.style.width = progressPercent + "%";
-        currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
-        durationEl.textContent = formatTime(audioPlayer.duration);
-      }
-    };
-
-    progressContainer.addEventListener("click", (e) => {
-      const width = progressContainer.clientWidth;
-      const clickX = e.offsetX;
-      const duration = audioPlayer.duration;
-      audioPlayer.currentTime = (clickX / width) * duration;
-    });
-
-    function formatTime(sec) {
-      const minutes = Math.floor(sec / 60);
-      const seconds = Math.floor(sec % 60);
-      return `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+    function pauseSong() {
+      audio.pause();
+      playBtn.textContent = "▶️";
     }
 
-    loadPlaylist();
+    function updateActiveSong() {
+      [...document.querySelectorAll(".song")].forEach((el, i) => {
+        el.classList.toggle("active", i === currentIndex);
+      });
+    }
+
+    document.getElementById("next").onclick = () => {
+      currentIndex = (currentIndex + 1) % filteredSongs.length;
+      playSong();
+    };
+    document.getElementById("prev").onclick = () => {
+      currentIndex = (currentIndex - 1 + filteredSongs.length) % filteredSongs.length;
+      playSong();
+    };
+    playBtn.onclick = () => {
+      if (audio.paused) playSong();
+      else pauseSong();
+    };
+
+    audio.addEventListener("ended", () => {
+      currentIndex = (currentIndex + 1) % filteredSongs.length;
+      playSong();
+    });
+
+    document.getElementById("search").addEventListener("input", (e) => {
+      const query = e.target.value.toLowerCase();
+      filteredSongs = songs.filter(s => s.title.toLowerCase().includes(query));
+      currentIndex = 0; // reset to first result
+      renderSongs();
+    });
+
+    loadSongs();
   </script>
 </body>
 </html>
