@@ -336,7 +336,7 @@ function playSong() {
   audio.play();
   playBtn.textContent = "⏸";
   updateActiveSong();
-  nowPlayingEl.textContent = "▶️ Now Playing: " + song.title;
+  nowPlayingEl.textContent = "▶️ " + song.title;
 
   if ("mediaSession" in navigator) {
     updateMetadata(song);
