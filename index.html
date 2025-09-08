@@ -331,6 +331,24 @@
   }
 
   loadSongs();
+  //
+  function renderSongs() {
+  songListEl.innerHTML = "";
+  // 🔽 Reverse the filtered list for display
+  const reversed = [...filteredSongs].reverse();
+
+  reversed.forEach((song) => {
+    const div = document.createElement("div");
+    div.className = "song" + (songs.indexOf(song) === currentIndex ? " active" : "");
+    div.textContent = (songs.indexOf(song) + 1) + ". " + song.title;
+    div.onclick = () => {
+      currentIndex = songs.indexOf(song); // ✅ keep original index
+      playSong();
+    };
+    songListEl.appendChild(div);
+  });
+}
+
 </script>
 
 </body>
