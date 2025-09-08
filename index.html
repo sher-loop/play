@@ -192,157 +192,146 @@
 
   <audio id="audio"></audio>
 
-  <script>
-    let songs = [];
-    let filteredSongs = [];
-    let currentIndex = 0;
-    const audio = document.getElementById("audio");
-    const songListEl = document.getElementById("songList");
-    const playBtn = document.getElementById("play");
-    const nowPlayingEl = document.getElementById("nowPlaying");
-    const progress = document.getElementById("progress");
-    const progressBar = document.getElementById("progressBar");
-    const currentTimeEl = document.getElementById("currentTime");
-    const durationEl = document.getElementById("duration");
-    const volumeSlider = document.getElementById("volume");
+<script>
+  let songs = [];
+  let filteredSongs = [];
+  let currentIndex = 0; // ✅ Always index from full songs list
+  const audio = document.getElementById("audio");
+  const songListEl = document.getElementById("songList");
+  const playBtn = document.getElementById("play");
+  const nowPlayingEl = document.getElementById("nowPlaying");
+  const progress = document.getElementById("progress");
+  const progressBar = document.getElementById("progressBar");
+  const currentTimeEl = document.getElementById("currentTime");
+  const durationEl = document.getElementById("duration");
+  const volumeSlider = document.getElementById("volume");
 
-    async function loadSongs() {
-      const res = await fetch("https://raw.githubusercontent.com/sher-loop/song/main/List/playlist.json");
-      songs = await res.json();
-      filteredSongs = songs;
-      renderSongs();
-    }
+  async function loadSongs() {
+    const res = await fetch("https://raw.githubusercontent.com/sher-loop/song/main/List/playlist.json");
+    songs = await res.json();
+    filteredSongs = songs;
+    renderSongs();
+  }
 
-    function renderSongs() {
-      songListEl.innerHTML = "";
-      filteredSongs.forEach((song, i) => {
-        const div = document.createElement("div");
-        div.className = "song" + (i === currentIndex ? " active" : "");
-        div.textContent = (i + 1) + ". " + song.title;
-        div.onclick = () => {
-          currentIndex = i;
-          playSong();
-        };
-        songListEl.appendChild(div);
-      });
-    }
-
-    function playSong() {
-      const song = filteredSongs[currentIndex];
-      if (!song) return;
-      audio.src = song.url;
-      audio.play();
-      playBtn.textContent = "⏸";
-      updateActiveSong();
-      nowPlayingEl.textContent = "▶️ " + song.title;
-    }
-
-    function pauseSong() {
-      audio.pause();
-      playBtn.textContent = "▶️";
-    }
-
-    function updateActiveSong() {
-      [...document.querySelectorAll(".song")].forEach((el, i) => {
-        el.classList.toggle("active", i === currentIndex);
-      });
-    }
-
-    document.getElementById("next").onclick = () => {
-      currentIndex = (currentIndex + 1) % filteredSongs.length;
-      playSong();
-    };
-    document.getElementById("prev").onclick = () => {
-      currentIndex = (currentIndex - 1 + filteredSongs.length) % filteredSongs.length;
-      playSong();
-    };
-    playBtn.onclick = () => {
-      if (audio.paused) playSong();
-      else pauseSong();
-    };
-
-    audio.addEventListener("ended", () => {
-      currentIndex = (currentIndex + 1) % filteredSongs.length;
-      playSong();
-    });
-
-    // ✅ Progress bar update
-    audio.addEventListener("timeupdate", () => {
-      const progressPercent = (audio.currentTime / audio.duration) * 100;
-      progress.style.width = progressPercent + "%";
-
-      currentTimeEl.textContent = formatTime(audio.currentTime);
-      durationEl.textContent = formatTime(audio.duration);
-    });
-
-    // ✅ Seek by clicking progress bar
-    progressBar.addEventListener("click", (e) => {
-      const width = progressBar.clientWidth;
-      const clickX = e.offsetX;
-      const duration = audio.duration;
-      audio.currentTime = (clickX / width) * duration;
-    });
-
-    function formatTime(seconds) {
-      if (isNaN(seconds)) return "0:00";
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
-      return `${mins}:${secs}`;
-    }
-
-    // ✅ Volume control
-    volumeSlider.addEventListener("input", (e) => {
-      audio.volume = e.target.value;
-    });
-
-    document.getElementById("search").addEventListener("input", (e) => {
-      const query = e.target.value.toLowerCase();
-      filteredSongs = songs.filter(s => s.title.toLowerCase().includes(query));
-      currentIndex = 0;
-      renderSongs();
-    });
-
-    loadSongs();
-    // ✅ Media Session API (for headphone & system controls)
-if ("mediaSession" in navigator) {
-  function updateMetadata(song) {
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: song.title,
-      artist: song.artist || "Unknown",
-      album: "Sherlock Playlist",
-      artwork: [
-        { src: "https://i.imgur.com/3pVZC3R.png", sizes: "512x512", type: "image/png" } // replace with your logo/cover
-      ]
+  function renderSongs() {
+    songListEl.innerHTML = "";
+    filteredSongs.forEach((song) => {
+      const div = document.createElement("div");
+      div.className = "song" + (songs.indexOf(song) === currentIndex ? " active" : "");
+      div.textContent = (songs.indexOf(song) + 1) + ". " + song.title;
+      div.onclick = () => {
+        currentIndex = songs.indexOf(song); // ✅ Always reference original index
+        playSong();
+      };
+      songListEl.appendChild(div);
     });
   }
 
-  navigator.mediaSession.setActionHandler("play", () => playSong());
-  navigator.mediaSession.setActionHandler("pause", () => pauseSong());
-  navigator.mediaSession.setActionHandler("previoustrack", () => {
-    currentIndex = (currentIndex - 1 + filteredSongs.length) % filteredSongs.length;
+  function playSong() {
+    const song = songs[currentIndex]; // ✅ Use full list
+    if (!song) return;
+    audio.src = song.url;
+    audio.play();
+    playBtn.textContent = "⏸";
+    updateActiveSong();
+    nowPlayingEl.textContent = "▶️ " + song.title;
+
+    if ("mediaSession" in navigator) {
+      updateMetadata(song);
+    }
+  }
+
+  function pauseSong() {
+    audio.pause();
+    playBtn.textContent = "▶️";
+  }
+
+  function updateActiveSong() {
+    [...document.querySelectorAll(".song")].forEach((el, i) => {
+      const song = filteredSongs[i];
+      el.classList.toggle("active", song && songs.indexOf(song) === currentIndex);
+    });
+  }
+
+  document.getElementById("next").onclick = () => {
+    currentIndex = (currentIndex + 1) % songs.length; // ✅ full list
+    playSong();
+  };
+  document.getElementById("prev").onclick = () => {
+    currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+    playSong();
+  };
+  playBtn.onclick = () => {
+    if (audio.paused) playSong();
+    else pauseSong();
+  };
+
+  audio.addEventListener("ended", () => {
+    currentIndex = (currentIndex + 1) % songs.length;
     playSong();
   });
-  navigator.mediaSession.setActionHandler("nexttrack", () => {
-    currentIndex = (currentIndex + 1) % filteredSongs.length;
-    playSong();
+
+  // ✅ Progress bar update
+  audio.addEventListener("timeupdate", () => {
+    const progressPercent = (audio.currentTime / audio.duration) * 100;
+    progress.style.width = progressPercent + "%";
+    currentTimeEl.textContent = formatTime(audio.currentTime);
+    durationEl.textContent = formatTime(audio.duration);
   });
-}
 
-// ✅ Update metadata whenever a new song plays
-function playSong() {
-  const song = filteredSongs[currentIndex];
-  if (!song) return;
-  audio.src = song.url;
-  audio.play();
-  playBtn.textContent = "⏸";
-  updateActiveSong();
-  nowPlayingEl.textContent = "▶️ " + song.title;
+  progressBar.addEventListener("click", (e) => {
+    const width = progressBar.clientWidth;
+    const clickX = e.offsetX;
+    const duration = audio.duration;
+    audio.currentTime = (clickX / width) * duration;
+  });
 
+  function formatTime(seconds) {
+    if (isNaN(seconds)) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
+    return `${mins}:${secs}`;
+  }
+
+  // ✅ Volume
+  volumeSlider.addEventListener("input", (e) => {
+    audio.volume = e.target.value;
+  });
+
+  // ✅ Search
+  document.getElementById("search").addEventListener("input", (e) => {
+    const query = e.target.value.toLowerCase();
+    filteredSongs = songs.filter(s => s.title.toLowerCase().includes(query));
+    renderSongs();
+  });
+
+  // ✅ Media Session API
   if ("mediaSession" in navigator) {
-    updateMetadata(song);
-  }
-}
+    function updateMetadata(song) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: song.title,
+        artist: song.artist || "Unknown",
+        album: "Sherlock Playlist",
+        artwork: [
+          { src: "https://i.imgur.com/3pVZC3R.png", sizes: "512x512", type: "image/png" }
+        ]
+      });
+    }
 
-  </script>
+    navigator.mediaSession.setActionHandler("play", () => playSong());
+    navigator.mediaSession.setActionHandler("pause", () => pauseSong());
+    navigator.mediaSession.setActionHandler("previoustrack", () => {
+      currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+      playSong();
+    });
+    navigator.mediaSession.setActionHandler("nexttrack", () => {
+      currentIndex = (currentIndex + 1) % songs.length;
+      playSong();
+    });
+  }
+
+  loadSongs();
+</script>
+
 </body>
 </html>
