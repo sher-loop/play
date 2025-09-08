@@ -158,6 +158,19 @@
       cursor: pointer;
       box-shadow: 0 0 10px #0ff, 0 0 20px #00f;
     }
+    .song-list {
+  display: flex;
+  flex-direction: column-reverse; /* 🔽 flip the list */
+  width: 90%;
+  max-width: 500px;
+  height: 400px;
+  overflow-y: auto;
+  padding: 10px;
+  border-radius: 10px;
+  background: #111;
+  box-shadow: inset 0 0 20px #00f;
+}
+
   </style>
 </head>
 <body>
@@ -343,6 +356,20 @@
     div.textContent = (songs.indexOf(song) + 1) + ". " + song.title;
     div.onclick = () => {
       currentIndex = songs.indexOf(song); // ✅ keep original index
+      playSong();
+    };
+    songListEl.appendChild(div);
+  });
+}
+//
+  function renderSongs() {
+  songListEl.innerHTML = "";
+  filteredSongs.forEach((song, i) => {
+    const div = document.createElement("div");
+    div.className = "song" + (i === currentIndex ? " active" : "");
+    div.textContent = (i + 1) + ". " + song.title;
+    div.onclick = () => {
+      currentIndex = i;
       playSong();
     };
     songListEl.appendChild(div);
