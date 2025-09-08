@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Player</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0d0d0d;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    header {
+      padding: 20px;
+      text-align: center;
+      font-size: 1.5rem;
+      color: #00ffe5;
+      text-shadow: 0 0 10px #00ffe5;
+    }
+    #searchBar {
+      margin: 10px 0 20px 0;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      width: 90%;
+      max-width: 500px;
+      font-size: 1rem;
+      background: #1a1a1a;
+      color: #00ffe5;
+      box-shadow: 0 0 8px rgba(0, 255, 229, 0.4);
+    }
+    #player {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #111;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 -2px 15px rgba(0, 255, 229, 0.3);
+    }
+    audio {
+      width: 100%;
+      max-width: 700px;
+    }
+    #playlist {
+      flex: 1;
+      width: 100%;
+      max-width: 800px;
+      padding: 20px;
+      overflow-y: auto;
+      margin-bottom: 120px;
+    }
+    .song {
+      padding: 10px;
+      margin-bottom: 8px;
+      background: #1a1a1a;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+    }
+    .song:hover {
+      background: #262626;
+      box-shadow: 0 0 10px rgba(0, 255, 229, 0.4);
+    }
+    .active {
+      background: #00ffe5;
+      color: #000;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header>⚡ Tech Black Music Player</header>
+  <input type="text" id="searchBar" placeholder="🔍 Search for a song...">
+  <div id="playlist">Loading songs...</div>
+  
+  <div id="player">
+    <div id="current-song">Select a song</div>
+    <audio id="audio" controls autoplay></audio>
+  </div>
+
+  <script>
+    const playlistEl = document.getElementById("playlist");
+    const audioEl = document.getElementById("audio");
+    const currentSongEl = document.getElementById("current-song");
+    const searchBar = document.getElementById("searchBar");
+
+    let songs = [];
+    let filteredSongs = [];
+    let currentIndex = 0;
+
+    async function loadPlaylist() {
+      try {
+        // ✅ Change URL to your hosted playlist.json
+        const res = await fetch("https://raw.githubusercontent.com/sher-loop/song/main/List/playlist.json");
+        songs = await res.json();
+        filteredSongs = songs;
+        renderPlaylist();
+      } catch (e) {
+        playlistEl.innerHTML = "⚠️ Failed to load playlist.";
+      }
+    }
+
+    function renderPlaylist() {
+      playlistEl.innerHTML = "";
+      filteredSongs.forEach((song, i) => {
+        const div = document.createElement("div");
+        div.className = "song";
+        div.textContent = `${i + 1}. ${song.title}`;
+        div.addEventListener("click", () => playSong(i));
+        playlistEl.appendChild(div);
+      });
+    }
+
+    function playSong(index) {
+      currentIndex = index;
+      audioEl.src = filteredSongs[index].url;
+      currentSongEl.textContent = `${index + 1}. ${filteredSongs[index].title}`;
+      highlightActive();
+      audioEl.play();
+    }
+
+    function highlightActive() {
+      document.querySelectorAll(".song").forEach((el, i) => {
+        el.classList.toggle("active", i === currentIndex);
+      });
+    }
+
+    // ✅ Autoplay next song
+    audioEl.addEventListener("ended", () => {
+      currentIndex = (currentIndex + 1) % filteredSongs.length;
+      playSong(currentIndex);
+    });
+
+    // ✅ Search filter
+    searchBar.addEventListener("input", (e) => {
+      const query = e.target.value.toLowerCase();
+      filteredSongs = songs.filter(song => song.title.toLowerCase().includes(query));
+      renderPlaylist();
+    });
+
+    loadPlaylist();
+  </script>
+</body>
+</html>
