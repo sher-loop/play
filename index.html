@@ -440,6 +440,32 @@ if ("mediaSession" in navigator) {
 
 /* initialize */
 loadSongs();
+  function renderSongs() {
+  songListEl.innerHTML = "";
+
+  // 🔽 Reverse only for display
+  const reversed = [...filteredSongs].reverse();
+
+  reversed.forEach((song, i) => {
+    const div = document.createElement("div");
+    // find the original index of this song in songs[]
+    const realIndex = songs.indexOf(song);
+
+    // mark active song correctly
+    div.className = "song" + (realIndex === currentIndex ? " active" : "");
+
+    // ✅ Display numbers top-down (1,2,3...)
+    div.textContent = (i + 1) + ". " + song.title;
+
+    div.onclick = () => {
+      currentIndex = realIndex; // keep correct order in songs[]
+      playSong();
+    };
+
+    songListEl.appendChild(div);
+  });
+}
+
 </script>
 </body>
 </html>
