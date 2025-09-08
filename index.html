@@ -349,15 +349,18 @@
     songListEl.appendChild(div);
   });
 }
-//
+/////////
   function renderSongs() {
   songListEl.innerHTML = "";
-  filteredSongs.forEach((song, i) => {
+  const reversed = [...filteredSongs].reverse(); // 🔄 flip playlist order
+  reversed.forEach((song, i) => {
     const div = document.createElement("div");
-    div.className = "song" + (i === currentIndex ? " active" : "");
-    div.textContent = (i + 1) + ". " + song.title;
+    // calculate real index in filteredSongs
+    const realIndex = filteredSongs.length - 1 - i;
+    div.className = "song" + (realIndex === currentIndex ? " active" : "");
+    div.textContent = (i + 1) + ". " + song.title; // ✅ keep 1,2,3 from top
     div.onclick = () => {
-      currentIndex = i;
+      currentIndex = realIndex;
       playSong();
     };
     songListEl.appendChild(div);
